@@ -1,81 +1,82 @@
-import json
-import os
+import java.util.ArrayList;
+import java.util.Scanner;
 
-class TodoList:
-    def __init__(self, filename='tasks.json'):
-        self.filename = filename
-        self.tasks = []
-        self.load_tasks()
+public class TodoListApp {
+    static class Task {
+        String description;
+        boolean completed;
 
-    def load_tasks(self):
-        """Load tasks from a JSON file if it exists."""
-        if os.path.exists(self.filename):
-            with open(self.filename, 'r') as file:
-                self.tasks = json.load(file)
-        else:
-            self.tasks = []
+        Task(String description) {
+            this.description = description;
+            this.completed = false;
+        }
+    }
 
-    def save_tasks(self):
-        """Save tasks to a JSON file."""
-        with open(self.filename, 'w') as file:
-            json.dump(self.tasks, file, indent=4)
+    private static ArrayList<Task> tasks = new ArrayList<>();
 
-    def add_task(self, task):
-        """Add a new task to the list."""
-        self.tasks.append({'task': task, 'completed': False})
-        print(f'Task "{task}" added.')
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            System.out.println("\nMenu:\n1. View Tasks\n2. Add Task\n3. Complete Task\n4. Exit");
+            System.out.print("Choose an option (1-4): ");
+            String choice = scanner.nextLine();
 
-    def list_tasks(self):
-        """Display all tasks with their status."""
-        if not self.tasks:
-            print("No tasks found.")
-            return
-        print("\nTo-Do List:")
-        for idx, task in enumerate(self.tasks, 1):
-            status = "✓" if task['completed'] else "✗"
-            print(f"{idx}. [{status}] {task['task']}")
+            switch (choice) {
+                case "1":
+                    listTasks();
+                    break;
+                case "2":
+                    System.out.print("Enter new task: ");
+                    String taskDesc = scanner.nextLine();
+                    addTask(taskDesc);
+                    break;
+                case "3":
+                    listTasks();
+                    System.out.print("Enter task number to complete: ");
+                    try {
+                        int taskNum = Integer.parseInt(scanner.nextLine());
+                        completeTask(taskNum);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid number.");
+                    }
+                    break;
+                case "4":
+                    System.out.println("Goodbye!");
+                    scanner.close();
+                    return;
+                default:
+                    System.out.println("Invalid choice.");
+            }
+        }
+    }
 
-    def complete_task(self, task_number):
-        """Mark a task as completed."""
-        if 0 < task_number <= len(self.tasks):
-            self.tasks[task_number - 1]['completed'] = True
-            print(f'Task #{task_number} marked as completed.')
-        else:
-            print("Invalid task number.")
+    private static void listTasks() {
+        if (tasks.isEmpty()) {
+            System.out.println("No tasks found.");
+            return;
+        }
+        System.out.println("\nTo-Do List:");
+        for (int i = 0; i < tasks.size(); i++) {
+            Task t = tasks.get(i);
+            System.out.printf("%d. [%s] %s\n", i + 1, t.completed ? "✓" : "✗", t.description);
+        }
+    }
 
-def main():
-    todo = TodoList()
+    private static void addTask(String desc) {
+        if (desc.trim().isEmpty()) {
+            System.out.println("Task cannot be empty.");
+            return;
+        }
+        tasks.add(new Task(desc));
+        System.out.println("Task added.");
+    }
 
-    while True:
-        print("\nMenu:")
-        print("1. View Tasks")
-        print("2. Add Task")
-        print("3. Complete Task")
-        print("4. Save and Exit")
-
-        choice = input("Choose an option (1-4): ").strip()
-
-        if choice == '1':
-            todo.list_tasks()
-        elif choice == '2':
-            task = input("Enter the new task: ").strip()
-            if task:
-                todo.add_task(task)
-            else:
-                print("Task cannot be empty.")
-        elif choice == '3':
-            todo.list_tasks()
-            try:
-                task_num = int(input("Enter task number to complete: "))
-                todo.complete_task(task_num)
-            except ValueError:
-                print("Please enter a valid number.")
-        elif choice == '4':
-            todo.save_tasks()
-            print("Tasks saved. Goodbye!")
-            break
-        else:
-            print("Invalid choice. Please select from 1 to 4.")
-
-if __name__ == "__main__":
-    main()
+    private static void completeTask(int num) {
+        if (num > 0 && num <= tasks.size()) {
+            tasks.get(num - 1).completed = true;
+            System.out.println("Task marked as completed.");
+        } else {
+            System.out.println("Invalid task number.");
+        }
+    }
+}
